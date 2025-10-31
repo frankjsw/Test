@@ -1,4 +1,4 @@
-name: Streamlit 自动唤醒
+name: Katabump 自动唤醒
 
 on:
   workflow_dispatch:
@@ -40,8 +40,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r keep/requirements.txt
 
-      - name: 执行 Streamlit 唤醒脚本
+      - name: 执行 Katabump 唤醒脚本
         env:
-          STREAMLIT_APP_URL: ${{ secrets.STREAMLIT_APP_URL }}
+          Katabump_APP_URL: ${{ secrets.Katabump_APP_URL }}
         run: |
-          python keep/streamlit-keep.py
+          python keep/Katabump-keep.py

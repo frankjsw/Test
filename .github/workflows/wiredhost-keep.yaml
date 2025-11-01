@@ -1,0 +1,62 @@
+name: Weirdhost 自动唤醒
+
+on:
+  workflow_dispatch:        # 手动触发
+  repository_dispatch:      # 由 Uptime Kuma 等外部事件触发
+    types: [service-down-alert]
+  schedule:
+    - cron: '0 0 */3 * *'   # 每三天执行一次 (UTC 时间)
+
+jobs:
+  wakeup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🧾 检查触发事件
+        run: |
+          echo "Workflow triggered by: ${{ github.event_name }}"
+          if [[ "${{ github.event_name }}" == "repository_dispatch" ]]; then
+            echo "触发事件类型 (Event Type): ${{ github.event.action }}"
+            echo "收到来自 Uptime Kuma 的下线通知，开始执行自动唤醒流程..."
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "工作流被手动触发，开始执行唤醒..."
+          else
+            echo "工作流由计划任务触发，开始执行唤醒..."
+          fi
+
+      - name: 📦 检出仓库代码
+        uses: actions/checkout@v4
+
+      - name: 🧰 安装 Chromium
+        uses: browser-actions/setup-chromium@v2
+
+      - name: 🐍 设置 Python 环境
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: 📦 安装 Python 依赖
+        working-directory: ${{ github.workspace }}
+        run: |
+          echo "当前工作目录：$(pwd)"
+          ls -al
+          python -m pip install --upgrade pip
+          pip install -r keep/requirements.txt
+          
+      - name: 🧭 调试目录结构
+        run: |
+          echo "当前路径：$(pwd)"
+          echo "=== 列出仓库所有文件 ==="
+          find . -maxdepth 3 -type f
+          
+      - name: 🚀 执行 Weirdhost 唤醒脚本
+        working-directory: ${{ github.workspace }}
+        env:
+          WEIRDHOST_APP_URL: ${{ secrets.WEIRDHOST_APP_URL }}
+        run: |
+          echo "当前工作目录：$(pwd)"
+          echo "列出 keep 目录内容："
+          ls -al keep || echo "⚠️ keep 目录不存在！"
+          
+          echo "开始执行唤醒脚本..."
+          python keep/weirdhost-keep.py

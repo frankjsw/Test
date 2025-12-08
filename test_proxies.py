@@ -46,7 +46,6 @@ proxies_list = [
     "socks5://208.65.90.21:4145",
 ]
 
-# 遍历代理列表
 for proxy in proxies_list:
     proxies = {
         "http": proxy,

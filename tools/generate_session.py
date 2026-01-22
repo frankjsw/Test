@@ -1,5 +1,5 @@
 """
-Telegram Session 生成工具
+Telegram Session 生成工具1
 
 功能：
 1. 使用手机号登录 Telegram，生成 telegram.session 文件
